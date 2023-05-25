@@ -25,4 +25,4 @@ Description of the project.
 
 5. Start Android: 
     press "a" in same terminal or "npm run android" in new terminal
-    (Make sure you have emmulator running or external device is connect to run).
+    (Make sure you have emmulator running or external device is connected to run).
