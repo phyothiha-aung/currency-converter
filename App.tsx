@@ -8,22 +8,18 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  ToastAndroid,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+
 import Selector from './components/Selector';
 import {CurrencyType} from './constants/data';
 import useExchange from './hooks/useExchange';
-
+import {handleCopy, getDate} from './utils/functions';
 interface ResultType {
   amount: number;
   rate: number;
 }
-
-const handleCopy = (text: string) => {
-  Clipboard.setString(text);
-  ToastAndroid.show('Copied to Clipboard', ToastAndroid.SHORT);
-};
 
 const App = () => {
   const [fromCurrency, setFromCurrency] = useState<CurrencyType>(
@@ -44,11 +40,6 @@ const App = () => {
   const handleInputChange = (text: string) => {
     const numericValue = text.replace(/[^0-9]/g, '');
     setInputValue(numericValue);
-  };
-
-  const getDate = (timestamp: number): string => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleString();
   };
 
   const getResult = (first: string, last: string) => {
@@ -74,81 +65,86 @@ const App = () => {
     );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {isLoading && (
-        <View style={styles.fail}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      )}
-      <Text style={styles.header}>Currency Converter</Text>
+    <SafeAreaView style={styles.safearea}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          {isLoading && (
+            <View style={styles.fail}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          )}
 
-      <View style={styles.converterContainer}>
-        <View style={styles.selectorContainer}>
-          <Selector
-            selectedOption={fromCurrency}
-            setOption={setFromCurrency}
-            title="From"
-            resetResult={resetResult}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Amount..."
-            value={inputValue}
-            keyboardType="numeric"
-            onChangeText={handleInputChange}
-          />
-        </View>
-        <View style={styles.selectorContainer}>
-          <Selector
-            selectedOption={toCurrency}
-            setOption={setToCurrency}
-            title="To"
-            resetResult={resetResult}
-          />
-          <TouchableOpacity
-            disabled={!result.amount}
-            onPress={() => handleCopy(result.amount.toFixed(8))}>
-            <Text
-              style={[
-                styles.input,
-                {backgroundColor: '#E1D9D1', paddingVertical: 10},
-              ]}
-              numberOfLines={1}
-              ellipsizeMode="tail">
-              {result.amount ? result.amount.toFixed(8) : ''}
+          <Text style={styles.header}>Currency Converter</Text>
+
+          <View style={styles.converterContainer}>
+            <View style={styles.selectorContainer}>
+              <Selector
+                selectedOption={fromCurrency}
+                setOption={setFromCurrency}
+                title="From"
+                resetResult={resetResult}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter Amount..."
+                value={inputValue}
+                keyboardType="numeric"
+                onChangeText={handleInputChange}
+              />
+            </View>
+            <View style={styles.selectorContainer}>
+              <Selector
+                selectedOption={toCurrency}
+                setOption={setToCurrency}
+                title="To"
+                resetResult={resetResult}
+              />
+              <TouchableOpacity
+                disabled={!result.amount}
+                onPress={() => handleCopy(result.amount.toFixed(8))}>
+                <Text
+                  style={[
+                    styles.input,
+                    {backgroundColor: '#E1D9D1', paddingVertical: 10},
+                  ]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail">
+                  {result.amount ? result.amount.toFixed(8) : ''}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.convertButton}
+              disabled={!fromCurrency.code || !toCurrency.code || !inputValue}
+              onPress={() => getResult(fromCurrency.code, toCurrency.code)}>
+              <Text
+                style={[
+                  styles.btnText,
+                  {
+                    color:
+                      !fromCurrency.code || !toCurrency.code || !inputValue
+                        ? 'gray'
+                        : 'black',
+                  },
+                ]}>
+                Convert
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <Text style={styles.rate}>
+              {result.rate &&
+                `1 ${fromCurrency.code} = ${result.rate.toFixed(8)} ${
+                  toCurrency.code
+                }`}
             </Text>
-          </TouchableOpacity>
+            <Text style={styles.rate}>
+              {!!result.rate && `at ${getDate(exchange.timestamp)}`}
+            </Text>
+          </View>
         </View>
-
-        <TouchableOpacity
-          style={styles.convertButton}
-          disabled={!fromCurrency.code || !toCurrency.code || !inputValue}
-          onPress={() => getResult(fromCurrency.code, toCurrency.code)}>
-          <Text
-            style={[
-              styles.btnText,
-              {
-                color:
-                  !fromCurrency.code || !toCurrency.code || !inputValue
-                    ? 'gray'
-                    : 'black',
-              },
-            ]}>
-            Convert
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View>
-        <Text style={styles.rate}>
-          {result.rate &&
-            `1 ${fromCurrency.code} = ${result.rate.toFixed(8)} ${
-              toCurrency.code
-            }`}
-        </Text>
-        <Text style={styles.rate}>
-          {!!result.rate && `at ${getDate(exchange.timestamp)}`}
-        </Text>
-      </View>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
@@ -164,6 +160,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#00ff0050',
     zIndex: 1,
   },
+  safearea: {flex: 1},
   container: {
     flex: 1,
     justifyContent: 'center',
