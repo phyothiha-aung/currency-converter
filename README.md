@@ -13,16 +13,16 @@ Description of the project.
 ### Installation
 
 1. Clone the repository:
-    git clone <repository-url>
+    "git clone https://github.com/phyothiha-aung/currency-converter.git"
 
 2. Go to Root directory
 
 3. Install depencies by typing 
-    npm install
+    "npm install"
 
-4. Start Metro Bundler 
-    npm run start
+4. Start Metro Bundler: 
+    "npm run start"
 
-5. Start Android
-    press 'a' in same terminal or 'npm run android' in new terminal
+5. Start Android: 
+    press "a" in same terminal or "npm run android" in new terminal
     (Make sure you have emmulator running or external device is connect to run).
